@@ -54,7 +54,7 @@ namespace PRUEBA.Vista
             }
         }
 
-        private void btnRecorrer_Click(object sender, EventArgs e)
+        private async void btnRecorrer_Click(object sender, EventArgs e)
         {
             if (tvInnovatec.Nodes.Count == 0)
             {
@@ -62,29 +62,43 @@ namespace PRUEBA.Vista
                 return;
             }
 
-            StringBuilder resultado = new StringBuilder();
-            Queue<TreeNode> cola = new Queue<TreeNode>();
+            // Limpiar colores previos
+            LimpiarColores(tvInnovatec.Nodes);
 
-            // Agregar todos los nodos raíz a la cola
-            foreach (TreeNode nodoRaiz in tvInnovatec.Nodes)
+            // Recorrer cada raíz en preorden
+            foreach (TreeNode nodo in tvInnovatec.Nodes)
             {
-                cola.Enqueue(nodoRaiz);
-
-                while (cola.Count > 0)
-                {
-                    TreeNode actual = cola.Dequeue();
-                    resultado.AppendLine(actual.Text);
-
-                    // Agregar hijos a la cola
-                    foreach (TreeNode hijo in actual.Nodes)
-                    {
-                        cola.Enqueue(hijo);
-                    }
-                }
+                await RecorridoPreordenAnimado(nodo);
             }
 
-            MessageBox.Show(resultado.ToString(), "Recorrido del Árbol", MessageBoxButtons.OK);
+            MessageBox.Show("Recorrido completado.", "Recorrido", MessageBoxButtons.OK);
         }
+
+        private async Task RecorridoPreordenAnimado(TreeNode nodo)
+        {
+            if (nodo == null) return;
+
+            // Pintar nodo visitado
+            nodo.BackColor = Color.LightBlue;
+            nodo.ForeColor = Color.Black;
+            tvInnovatec.SelectedNode = nodo;
+            nodo.EnsureVisible();
+
+            // Pausa para mostrar la animación
+            await Task.Delay(600);
+
+            // Restaurar colores del nodo
+            nodo.BackColor = Color.White;
+            nodo.ForeColor = Color.Black;
+
+            // Recorrer hijos en preorden
+            foreach (TreeNode hijo in nodo.Nodes)
+            {
+                await RecorridoPreordenAnimado(hijo);
+            }
+        }
+
+
 
         private void btnBuscar_Click(object sender, EventArgs e)
         {
@@ -102,8 +116,8 @@ namespace PRUEBA.Vista
 
             if (nodoEncontrado != null)
             {
-                nodoEncontrado.BackColor = Color.Blue;
-                nodoEncontrado.ForeColor = Color.White;
+                nodoEncontrado.BackColor = Color.LightBlue;
+                nodoEncontrado.ForeColor = Color.Black;
                 tvInnovatec.SelectedNode = nodoEncontrado;
                 nodoEncontrado.EnsureVisible(); // Asegura que se vea el nodo en el TreeView
                 tbBuscar.Clear();
